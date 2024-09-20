@@ -1,35 +1,73 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import { useQuery } from './react-query';
+
+const fetchData = () : Promise<any> => {
+  console.log('fetching data');
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve([
+        {
+          name: 'Title 1',
+          description: 'This is post 1',
+        },
+        {
+          name: 'Title 2',
+          description: 'This is post 2',
+        },
+      ]);
+    }, 1000);
+  });
+};
+
+const Posts = ({ title } : { title: string }) => {
+  const { isFetching, isLoading, isError, data } = useQuery({
+    queryKey: ['postsData'],
+    queryFn: fetchData,
+  });;
+
+  if (isLoading) return 'Loading...';
+
+  if (isError)
+    return (
+      'An error has occurred: '
+    );
+
+  return (
+    <div style={{ padding: 20 }}>
+      <h1>{title}</h1>
+      {isFetching && <p>Refetching...</p>}
+      {data?.map((item : any) => (
+        <div key={item.name}>
+          <h3>{item.name}</h3>
+          <p>{item.description}</p>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [showPosts1, setShowPosts1] = useState(true);
+  const [showPosts2, setShowPosts2] = useState(true);
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <button
+        onClick={() => setShowPosts1(!showPosts1)}
+      >
+        Toggle Posts 1
+      </button>
+      <button
+        onClick={() => setShowPosts2(!showPosts2)}
+      >
+        Toggle Posts 2
+      </button>
+      <div style={{ display: 'flex' }}>
+        {showPosts1 && <Posts title="Posts 1" />}
+        {showPosts2 && <Posts title="Posts 2" />}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
